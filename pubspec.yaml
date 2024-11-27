@@ -1,0 +1,37 @@
+name: xerp_motor
+description: "A new Flutter project."
+publish_to: 'none'
+version: 1.0.0+2
+
+environment:
+  sdk: '>=3.2.3 <4.0.0'
+
+dependencies:
+  change_app_package_name: ^1.2.0
+  flutter:
+    sdk: flutter
+  flutter_launcher_icons: ^0.13.1
+  flutter_typeahead: ^4.7.0
+  http: ^1.2.0
+  intl: ^0.19.0
+  pdf: ^3.10.8
+  printing: ^5.12.0
+  shared_preferences: ^2.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+  
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/img/icone.png"
+  remove_alpha_ios: true
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/img/icone.png"  
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/img/
