@@ -17,6 +17,15 @@ class _LoginPageState extends State<LoginPage> {
   final _usuarioController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _obscureText = true;
+
+  // Cores personalizadas
+  static const Color primaryColor = Color(0xFF2C3E50);
+  static const Color secondaryColor = Color(0xFF3498DB);
+  static const Color accentColor = Color(0xFFE74C3C);
+  static const Color backgroundColor = Color(0xFFF5F7FA);
+  static const Color textColor = Color(0xFF34495E);
+  static const Color lightGrey = Color(0xFFECF0F1);
 
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
@@ -48,15 +57,34 @@ class _LoginPageState extends State<LoginPage> {
           context,
           MaterialPageRoute(builder: (context) => const HomePage()),
         );
-        print('Login bem-sucedido!');
-        print('Token: $token');
       } else {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Falha no login. Tente novamente.'),
+          SnackBar(
+            content: const Text(
+              'Falha no login. Tente novamente.',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            backgroundColor: accentColor,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            elevation: 4,
+            duration: const Duration(seconds: 3),
+            action: SnackBarAction(
+              label: 'OK',
+              textColor: Colors.white,
+              onPressed: () {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              },
+            ),
           ),
         );
-        print('Falha no login. Tente novamente.');
       }
     }
   }
@@ -64,178 +92,260 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              backgroundColor,
+              Colors.white,
+            ],
+          ),
+        ),
+        child: SingleChildScrollView(
           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
                 width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Color(0xff043259),
-                ),
-                child: const Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 360,
-                      height: 115,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Seja bem vindo(a)',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontFamily: 'Outfit',
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          Text(
-                            'Faça login para acessar sua conta',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontFamily: 'Outfit',
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ],
-                      ),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      primaryColor,
+                      secondaryColor,
+                    ],
+                  ),
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(40),
+                    bottomRight: Radius.circular(40),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryColor.withOpacity(0.2),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
                     ),
                   ],
                 ),
-              ),
-              Container(
+                padding: const EdgeInsets.fromLTRB(20, 60, 20, 30),
                 child: Column(
                   children: [
+                    const Text(
+                      'Seja bem vindo(a)',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontFamily: 'Outfit',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Faça login para acessar sua conta',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 16,
+                        fontFamily: 'Outfit',
+                      ),
+                    ),
+                    const SizedBox(height: 30),
                     Container(
-                      margin: const EdgeInsets.only(top: 80.0),
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.2),
+                          width: 1,
+                        ),
+                      ),
                       child: Image.asset(
                         "assets/img/logo_branca.png",
+                        height: 80,
                       ),
                     ),
                   ],
                 ),
               ),
-              Form(
-                key: _formKey,
-                child: Container(
-                  margin: const EdgeInsets.only(top: 35.0, left: 16.0, right: 16.0),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextFormField(
-                            controller: _usuarioController,
-                            keyboardType: TextInputType.text,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              labelText: 'Usuário',
+              Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.1),
+                              spreadRadius: 1,
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
                             ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Por favor, digite seu usuário!';
-                              }
-                              return null;
-                            },
-                          ),
+                          ],
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextFormField(
-                            controller: _passwordController,
-                            keyboardType: TextInputType.text,
-                            validator: (senha) {
-                              if (senha == null || senha.isEmpty) {
-                                return 'Por favor, digite sua senha!';
-                              } else if (senha.length < 5) {
-                                return 'Por favor, senha maior que 5 caracteres';
-                              }
-                              return null;
-                            },
-                            obscureText: true,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              labelText: 'Senha',
+                        child: TextFormField(
+                          controller: _usuarioController,
+                          style: const TextStyle(color: textColor),
+                          decoration: InputDecoration(
+                            labelText: 'Usuário',
+                            labelStyle: const TextStyle(color: textColor),
+                            prefixIcon: const Icon(Icons.person_outline, color: secondaryColor),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide.none,
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 16,
                             ),
                           ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Por favor, digite seu usuário!';
+                            }
+                            return null;
+                          },
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Container(
-                margin: const EdgeInsets.only(top: 20.0, left: 12.0, right: 12.0),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 80,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: _isLoading
-                        ? const CircularProgressIndicator()
-                        : TextButton(
-                            style: TextButton.styleFrom(
-                              backgroundColor: const Color(0xFF043259),
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.1),
+                              spreadRadius: 1,
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
                             ),
-                            onPressed: _login,
-                            child: const Text(
-                              'ENTRAR',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                  ),
-                ),
-              ),
-              Container(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.only(top: 10.0, right: 18.0),
-                          child: GestureDetector(
-                            onTap: () {},
-                            child: const Text(
-                              'Esqueceu sua senha?',
-                              style: TextStyle(
-                                color: Color(0xff043259),
-                                fontSize: 14,
-                                fontFamily: 'Outfit',
-                                fontWeight: FontWeight.w400,
+                          ],
+                        ),
+                        child: TextFormField(
+                          controller: _passwordController,
+                          style: const TextStyle(color: textColor),
+                          obscureText: _obscureText,
+                          decoration: InputDecoration(
+                            labelText: 'Senha',
+                            labelStyle: const TextStyle(color: textColor),
+                            prefixIcon: const Icon(Icons.lock_outline, color: secondaryColor),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscureText ? Icons.visibility_off : Icons.visibility,
+                                color: secondaryColor,
                               ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscureText = !_obscureText;
+                                });
+                              },
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide.none,
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 16,
                             ),
                           ),
+                          validator: (senha) {
+                            if (senha == null || senha.isEmpty) {
+                              return 'Por favor, digite sua senha!';
+                            } else if (senha.length < 5) {
+                              return 'Por favor, senha maior que 5 caracteres';
+                            }
+                            return null;
+                          },
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _login,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: secondaryColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            elevation: 2,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Text(
+                                  'ENTRAR',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextButton(
+                        onPressed: () {},
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                        ),
+                        child: Text(
+                          'Esqueceu sua senha?',
+                          style: TextStyle(
+                            color: secondaryColor,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Container(
-                child: Column(
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(top: 80.0),
-                      child: Image.asset(
-                        "assets/img/logo_down.png",
-                      ),
+                margin: const EdgeInsets.only(top: 40),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      spreadRadius: 1,
+                      blurRadius: 10,
+                      offset: const Offset(0, -2),
                     ),
                   ],
                 ),
-              )
+                child: Image.asset(
+                  "assets/img/logo_down.png",
+                  height: 40,
+                ),
+              ),
             ],
           ),
         ),

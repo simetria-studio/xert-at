@@ -1,0 +1,2 @@
+C:/Users/felipe-pc/Documents/apps/atticket/android/app/.cxx/RelWithDebInfo/3n2l1g6y/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/felipe-pc/Documents/apps/atticket/android/app/.cxx/RelWithDebInfo/3n2l1g6y/x86_64/CMakeFiles/rebuild_cache.dir

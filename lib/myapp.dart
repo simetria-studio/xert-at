@@ -5,6 +5,8 @@ import 'package:xerp_motor/pages/home.dart';
 import 'package:xerp_motor/pages/listall.dart';
 import 'package:xerp_motor/pages/login.dart';
 import 'package:xerp_motor/pages/ticket_list.dart';
+import 'package:xerp_motor/pages/abastecimento.dart';
+import 'package:xerp_motor/pages/assinatura.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -45,6 +47,8 @@ class _MyAppState extends State<MyApp> {
         '/ticket': (context) => const CadTicket(),
         '/login': (context) => const LoginPage(),
         '/listall': (context) => const TicketListAllPage(),
+        '/abastecimento': (context) => const AbastecimentoPage(),
+        '/assinatura': (context) => const AssinaturaPage(),
       },
     );
   }

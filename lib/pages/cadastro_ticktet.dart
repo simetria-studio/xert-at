@@ -8,6 +8,61 @@ import 'package:xerp_motor/class/api_config.dart';
 import 'package:xerp_motor/pages/listall.dart';
 import 'package:xerp_motor/pages/ticket_list.dart';
 
+class PilhaSection {
+  final TextEditingController pilhaController = TextEditingController();
+  final TextEditingController altura1Controller = TextEditingController();
+  final TextEditingController altura2Controller = TextEditingController();
+  final TextEditingController altura3Controller = TextEditingController();
+  final TextEditingController altura4Controller = TextEditingController();
+  final TextEditingController altura5Controller = TextEditingController();
+  final TextEditingController altura6Controller = TextEditingController();
+  final TextEditingController larguraController = TextEditingController();
+  final TextEditingController comprimentoController = TextEditingController();
+  final TextEditingController alturaJulieta1Controller =
+      TextEditingController();
+  final TextEditingController alturaJulieta2Controller =
+      TextEditingController();
+  final TextEditingController alturaJulieta3Controller =
+      TextEditingController();
+  final TextEditingController alturaJulieta4Controller =
+      TextEditingController();
+  final TextEditingController alturaJulieta5Controller =
+      TextEditingController();
+  final TextEditingController alturaJulieta6Controller =
+      TextEditingController();
+  final TextEditingController larguraJulietaController =
+      TextEditingController();
+  final TextEditingController comprimentoJulietaController =
+      TextEditingController();
+  final TextEditingController totalCavaloController = TextEditingController();
+  final TextEditingController totalJulietaController = TextEditingController();
+
+  List<Map<String, dynamic>> produtosSelecionados = [];
+  String? selectedProduto;
+
+  void dispose() {
+    pilhaController.dispose();
+    altura1Controller.dispose();
+    altura2Controller.dispose();
+    altura3Controller.dispose();
+    altura4Controller.dispose();
+    altura5Controller.dispose();
+    altura6Controller.dispose();
+    larguraController.dispose();
+    comprimentoController.dispose();
+    alturaJulieta1Controller.dispose();
+    alturaJulieta2Controller.dispose();
+    alturaJulieta3Controller.dispose();
+    alturaJulieta4Controller.dispose();
+    alturaJulieta5Controller.dispose();
+    alturaJulieta6Controller.dispose();
+    larguraJulietaController.dispose();
+    comprimentoJulietaController.dispose();
+    totalCavaloController.dispose();
+    totalJulietaController.dispose();
+  }
+}
+
 class CadTicket extends StatefulWidget {
   const CadTicket({super.key});
 
@@ -81,6 +136,13 @@ class _CadTicketState extends State<CadTicket> {
       []; // Lista de produtos carregados da API
   List<Map<String, dynamic>> produtosSelecionados = [];
 
+  List<bool> pilhaVisibility = [
+    false
+  ]; // Lista para controlar a visibilidade de cada seção
+  List<PilhaSection> pilhaSections = [PilhaSection()];
+
+  String? selectedProduto; // Adicione esta linha
+
   String formatarNumero(double valor) {
     // Converte o valor para string e remove qualquer ponto decimal
     String numeroString = valor.toString().replaceAll('.', '');
@@ -128,6 +190,9 @@ class _CadTicketState extends State<CadTicket> {
     comprimentoJulietaController.dispose();
     totalCavaloController.dispose();
     totalJulietaController.dispose();
+    for (var section in pilhaSections) {
+      section.dispose();
+    }
     super.dispose();
   }
 
@@ -168,7 +233,11 @@ class _CadTicketState extends State<CadTicket> {
     setState(() {
       userDataLoaded = true;
     });
-    await _fetchClientes('');
+    // await _fetchClientes('');
+    // await _fetchDepositos('');
+    // await _fetchPlacas('');
+    // await _fetchPlacasCarretas('');
+    await _fetchProdutos('');
   }
 
   @override
@@ -309,6 +378,7 @@ class _CadTicketState extends State<CadTicket> {
       if (responseData is List<dynamic>) {
         setState(() {
           produtos = List<Map<String, dynamic>>.from(responseData);
+          print(produtos);
         });
 
         // Salve os produtos em SharedPreferences se não há texto de busca
@@ -346,10 +416,10 @@ class _CadTicketState extends State<CadTicket> {
       final dynamic responseData = json.decode(response.body);
       if (responseData is List<dynamic>) {
         setState(() {
-          produtos = List<Map<String, dynamic>>.from(
-              responseData); // Armazene os produtos na lista
+          funcionarios = List<Map<String, dynamic>>.from(responseData);
+          // print(funcionarios);
         });
-        return produtos;
+        return funcionarios;
       } else {
         throw Exception(
             "Falha ao carregar os produtos: dados não são uma lista");
@@ -384,55 +454,53 @@ class _CadTicketState extends State<CadTicket> {
     var url = Uri.parse('${ApiConfig.apiUrl}/store-ticket');
     var produtos = produtosSelecionados;
 
-    double pilhaValue;
     try {
-      pilhaValue = double.parse(pilhaController.text);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('O valor da pilha deve ser um número válido: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
+      // Lista para armazenar os dados de todas as seções
+      List<Map<String, dynamic>> secoes = [];
+      
+      // Itera sobre todas as seções para coletar os dados
+      for (var section in pilhaSections) {
+        secoes.add({
+          'pilha': double.tryParse(section.pilhaController.text.replaceAll(',', '.')) ?? 0,
+          'altura1': section.altura1Controller.text,
+          'altura2': section.altura2Controller.text,
+          'altura3': section.altura3Controller.text,
+          'altura4': section.altura4Controller.text,
+          'altura5': section.altura5Controller.text,
+          'altura6': section.altura6Controller.text,
+          'largura': section.larguraController.text,
+          'comprimento': section.comprimentoController.text,
+          'alturaJulieta1': section.alturaJulieta1Controller.text,
+          'alturaJulieta2': section.alturaJulieta2Controller.text,
+          'alturaJulieta3': section.alturaJulieta3Controller.text,
+          'alturaJulieta4': section.alturaJulieta4Controller.text,
+          'alturaJulieta5': section.alturaJulieta5Controller.text,
+          'alturaJulieta6': section.alturaJulieta6Controller.text,
+          'larguraJulieta': section.larguraJulietaController.text,
+          'comprimentoJulieta': section.comprimentoJulietaController.text,
+          'totalCavalo': section.totalCavaloController.text,
+          'totalJulieta': section.totalJulietaController.text,
+          'produtos': section.produtosSelecionados,
+        });
+      }
 
-    var corpo = jsonEncode({
-      "numero_ci": ciNumberController.text,
-      "codigo_cliente": _clienteController.text,
-      "cliente": _clienteController.text,
-      "motorista": driverNameController.text,
-      "data_entrada": entryDate.toString(),
-      "peso_liquido": netWeightController.text,
-      "volume": volumeController.text,
-      "observacoes": observationsController.text,
-      "total": totalController.text,
-      'codigo_deposito': _depositoController.text,
-      'placa_veiculo': _placaVeiculoController.text,
-      'placa_carreta': _placaCarretaController.text,
-      'pilha': pilhaValue,
-      "materiais": produtos.isNotEmpty ? produtos : [],
-      'altura1': altura1Controller.text,
-      'altura2': altura2Controller.text,
-      'altura3': altura3Controller.text,
-      'altura4': altura4Controller.text,
-      'altura5': altura5Controller.text,
-      'altura6': altura6Controller.text,
-      'largura': larguraController.text,
-      'comprimento': comprimentoController.text,
-      'alturaJulieta1': alturaJulieta1Controller.text,
-      'alturaJulieta2': alturaJulieta2Controller.text,
-      'alturaJulieta3': alturaJulieta3Controller.text,
-      'alturaJulieta4': alturaJulieta4Controller.text,
-      'alturaJulieta5': alturaJulieta5Controller.text,
-      'alturaJulieta6': alturaJulieta6Controller.text,
-      'larguraJulieta': larguraJulietaController.text,
-      'comprimentoJulieta': comprimentoJulietaController.text,
-      'totalCavalo': totalCavaloController.text,
-      'totalJulieta': totalJulietaController.text,
-    });
+      var corpo = jsonEncode({
+        "numero_ci": ciNumberController.text,
+        "codigo_cliente": _clienteController.text,
+        "cliente": _clienteController.text,
+        "motorista": driverNameController.text,
+        "data_entrada": entryDate.toString(),
+        "peso_liquido": netWeightController.text,
+        "volume": volumeController.text,
+        "observacoes": observationsController.text,
+        "total": totalController.text,
+        'codigo_deposito': _depositoController.text,
+        'placa_veiculo': _placaVeiculoController.text,
+        'placa_carreta': _placaCarretaController.text,
+        'secoes': secoes,  // Todas as seções com seus respectivos dados
+        "materiais": produtos.isNotEmpty ? produtos : [],
+      });
 
-    try {
       var resposta = await http.post(
         url,
         body: corpo,
@@ -500,14 +568,28 @@ class _CadTicketState extends State<CadTicket> {
                         );
                       }).toList(),
                       onChanged: (String? newValue) {
-                        setState(() {
-                          selectedProduto = newValue;
-                          selectedMaterials.forEach((key, value) {
-                            selectedMaterials[key]?['selected'] =
-                                key == selectedProduto;
+                        if (newValue != null) {
+                          setState(() {
+                            selectedProduto = newValue;
+                            var produto = produtos.firstWhere((element) =>
+                                element['codigo_produto']?.toString() ==
+                                newValue);
+
+                            produtosSelecionados.add({
+                              'descricao': produto['descricao_produto'] ??
+                                  'Sem descrição',
+                              'quantidade': 1, // Quantidade padrão
+                              'preco_custo_produto':
+                                  produto['preco_custo_produto'] != null
+                                      ? produto['preco_custo_produto']
+                                          .toDouble()
+                                      : 0.0,
+                            });
+                            atualizarTotal();
+                            selectedProduto =
+                                null; // Limpa a seleção após adicionar
                           });
-                          updateSelectedMaterials();
-                        });
+                        }
                       },
                       isExpanded: true,
                     );
@@ -583,75 +665,142 @@ class _CadTicketState extends State<CadTicket> {
 
   void calcularTotais() {
     try {
-      // Calcula total do cavalo
-      List<double> alturasCavalo = [
-        double.tryParse(altura1Controller.text.replaceAll(',', '.')) ?? 0,
-        double.tryParse(altura2Controller.text.replaceAll(',', '.')) ?? 0,
-        double.tryParse(altura3Controller.text.replaceAll(',', '.')) ?? 0,
-        double.tryParse(altura4Controller.text.replaceAll(',', '.')) ?? 0,
-        double.tryParse(altura5Controller.text.replaceAll(',', '.')) ?? 0,
-        double.tryParse(altura6Controller.text.replaceAll(',', '.')) ?? 0,
-      ];
+      double totalGeral = 0; // Variável para somar todos os totais
 
-      // Filtra apenas as alturas preenchidas (diferentes de 0)
-      List<double> alturasPreenchidas =
-          alturasCavalo.where((altura) => altura > 0).toList();
+      for (int i = 0; i < pilhaSections.length; i++) {
+        // Calcula total do cavalo
+        List<double> alturasCavalo = [
+          double.tryParse(pilhaSections[i]
+                  .altura1Controller
+                  .text
+                  .replaceAll(',', '.')) ??
+              0,
+          double.tryParse(pilhaSections[i]
+                  .altura2Controller
+                  .text
+                  .replaceAll(',', '.')) ??
+              0,
+          double.tryParse(pilhaSections[i]
+                  .altura3Controller
+                  .text
+                  .replaceAll(',', '.')) ??
+              0,
+          double.tryParse(pilhaSections[i]
+                  .altura4Controller
+                  .text
+                  .replaceAll(',', '.')) ??
+              0,
+          double.tryParse(pilhaSections[i]
+                  .altura5Controller
+                  .text
+                  .replaceAll(',', '.')) ??
+              0,
+          double.tryParse(pilhaSections[i]
+                  .altura6Controller
+                  .text
+                  .replaceAll(',', '.')) ??
+              0,
+        ];
 
-      double mediaAlturaCavalo = alturasPreenchidas.isNotEmpty
-          ? alturasPreenchidas.reduce((a, b) => a + b) /
-              alturasPreenchidas.length
-          : 0;
+        List<double> alturasPreenchidas =
+            alturasCavalo.where((altura) => altura > 0).toList();
 
-      double largura =
-          double.tryParse(larguraController.text.replaceAll(',', '.')) ?? 0;
-      double comprimento =
-          double.tryParse(comprimentoController.text.replaceAll(',', '.')) ?? 0;
+        double mediaAlturaCavalo = alturasPreenchidas.isNotEmpty
+            ? alturasPreenchidas.reduce((a, b) => a + b) /
+                alturasPreenchidas.length
+            : 0;
 
-      double totalCavalo = mediaAlturaCavalo * largura * comprimento;
+        double largura = double.tryParse(
+                pilhaSections[i].larguraController.text.replaceAll(',', '.')) ??
+            0;
+        double comprimento = double.tryParse(pilhaSections[i]
+                .comprimentoController
+                .text
+                .replaceAll(',', '.')) ??
+            0;
 
-      // Calcula total da julieta separadamente
-      List<double> alturasJulieta = [
-        double.tryParse(alturaJulieta1Controller.text.replaceAll(',', '.')) ??
-            0,
-        double.tryParse(alturaJulieta2Controller.text.replaceAll(',', '.')) ??
-            0,
-        double.tryParse(alturaJulieta3Controller.text.replaceAll(',', '.')) ??
-            0,
-        double.tryParse(alturaJulieta4Controller.text.replaceAll(',', '.')) ??
-            0,
-        double.tryParse(alturaJulieta5Controller.text.replaceAll(',', '.')) ??
-            0,
-        double.tryParse(alturaJulieta6Controller.text.replaceAll(',', '.')) ??
-            0,
-      ];
+        double totalCavalo = mediaAlturaCavalo * largura * comprimento;
 
-      // Filtra apenas as alturas preenchidas (diferentes de 0)
-      List<double> alturasJulietaPreenchidas =
-          alturasJulieta.where((altura) => altura > 0).toList();
+        // Calcula total da julieta
+        List<double> alturasJulieta = [
+          double.tryParse(pilhaSections[i]
+                  .alturaJulieta1Controller
+                  .text
+                  .replaceAll(',', '.')) ??
+              0,
+          double.tryParse(pilhaSections[i]
+                  .alturaJulieta2Controller
+                  .text
+                  .replaceAll(',', '.')) ??
+              0,
+          double.tryParse(pilhaSections[i]
+                  .alturaJulieta3Controller
+                  .text
+                  .replaceAll(',', '.')) ??
+              0,
+          double.tryParse(pilhaSections[i]
+                  .alturaJulieta4Controller
+                  .text
+                  .replaceAll(',', '.')) ??
+              0,
+          double.tryParse(pilhaSections[i]
+                  .alturaJulieta5Controller
+                  .text
+                  .replaceAll(',', '.')) ??
+              0,
+          double.tryParse(pilhaSections[i]
+                  .alturaJulieta6Controller
+                  .text
+                  .replaceAll(',', '.')) ??
+              0,
+        ];
 
-      double mediaAlturaJulieta = alturasJulietaPreenchidas.isNotEmpty
-          ? alturasJulietaPreenchidas.reduce((a, b) => a + b) /
-              alturasJulietaPreenchidas.length
-          : 0;
+        List<double> alturasJulietaPreenchidas =
+            alturasJulieta.where((altura) => altura > 0).toList();
 
-      double larguraJ =
-          double.tryParse(larguraJulietaController.text.replaceAll(',', '.')) ??
-              0;
-      double comprimentoJ = double.tryParse(
-              comprimentoJulietaController.text.replaceAll(',', '.')) ??
-          0;
+        double mediaAlturaJulieta = alturasJulietaPreenchidas.isNotEmpty
+            ? alturasJulietaPreenchidas.reduce((a, b) => a + b) /
+                alturasJulietaPreenchidas.length
+            : 0;
 
-      double totalJulieta = mediaAlturaJulieta * larguraJ * comprimentoJ;
+        double larguraJ = double.tryParse(pilhaSections[i]
+                .larguraJulietaController
+                .text
+                .replaceAll(',', '.')) ??
+            0;
+        double comprimentoJ = double.tryParse(pilhaSections[i]
+                .comprimentoJulietaController
+                .text
+                .replaceAll(',', '.')) ??
+            0;
 
+        double totalJulieta = mediaAlturaJulieta * larguraJ * comprimentoJ;
+
+        // Soma ao total geral
+        totalGeral += (totalCavalo + totalJulieta);
+
+        setState(() {
+          pilhaSections[i].totalCavaloController.text =
+              formatarNumero(totalCavalo);
+          pilhaSections[i].totalJulietaController.text =
+              formatarNumero(totalJulieta);
+        });
+      }
+
+      // Atualiza o total geral fora do loop
       setState(() {
-        // Atualiza os totais com 2 casas decimais
-        totalCavaloController.text = formatarNumero(totalCavalo);
-        totalJulietaController.text = formatarNumero(totalJulieta);
-        totalController.text = formatarNumero(totalCavalo + totalJulieta);
+        totalController.text = formatarNumero(totalGeral);
       });
     } catch (e) {
       print('Erro ao calcular totais: $e');
     }
+  }
+
+  void adicionarSecaoPilha() {
+    setState(() {
+      pilhaVisibility.add(false);
+      pilhaSections.add(PilhaSection());
+    });
   }
 
   @override
@@ -817,13 +966,411 @@ class _CadTicketState extends State<CadTicket> {
                 ),
               ),
               const SizedBox(height: 10),
-              CustomTextFormField(
-                controller: pilhaController,
-                label: 'Tamanho da pilha',
-                icon: Icons.numbers,
-                keyboardType: TextInputType.number,
-                validator: (value) =>
-                    value!.isEmpty ? 'Este campo é obrigatório' : null,
+              Column(
+                children: [
+                  ElevatedButton(
+                    onPressed: adicionarSecaoPilha,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF043259),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Adicionar Tamanho da Pilha',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  ...List.generate(pilhaVisibility.length, (index) {
+                    return Column(
+                      children: [
+                        ListTile(
+                          title: Text('Seção da Pilha ${index + 1}'),
+                          trailing: IconButton(
+                            icon: Icon(
+                              pilhaVisibility[index]
+                                  ? Icons.expand_less
+                                  : Icons.expand_more,
+                              color: const Color(0xFF043259),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                pilhaVisibility[index] =
+                                    !pilhaVisibility[index];
+                              });
+                            },
+                          ),
+                        ),
+                        if (pilhaVisibility[index]) ...[
+                          CustomTextFormField(
+                            controller: pilhaSections[index].pilhaController,
+                            label: 'Tamanho da pilha ${index + 1}',
+                            icon: Icons.numbers,
+                            keyboardType: TextInputType.number,
+                            validator: (value) => value!.isEmpty
+                                ? 'Este campo é obrigatório'
+                                : null,
+                          ),
+                          const SizedBox(height: 20),
+                          StatefulBuilder(
+                            builder: (BuildContext context,
+                                StateSetter setStateBuilder) {
+                              return Column(
+                                children: [
+                                  DropdownButton<String>(
+                                    value: selectedProduto,
+                                    hint: const Text('Selecione um produto'),
+                                    items: produtos
+                                        .map<DropdownMenuItem<String>>(
+                                            (Map<String, dynamic> produto) {
+                                      return DropdownMenuItem<String>(
+                                        value: produto['codigo_produto']
+                                                ?.toString() ??
+                                            '',
+                                        child: Text(
+                                            produto['descricao_produto'] ??
+                                                'Sem descrição'),
+                                      );
+                                    }).toList(),
+                                    onChanged: (String? newValue) {
+                                      if (newValue != null) {
+                                        setStateBuilder(() {
+                                          selectedProduto = newValue;
+                                          newValue;
+                                          var produto = produtos.firstWhere(
+                                              (element) =>
+                                                  element['codigo_produto']
+                                                      ?.toString() ==
+                                                  newValue);
+
+                                          pilhaSections[index]
+                                              .produtosSelecionados
+                                              .add({
+                                            'descricao':
+                                                produto['descricao_produto'] ??
+                                                    'Sem descrição',
+                                            'quantidade': 1,
+                                            'preco_custo_produto': produto[
+                                                        'preco_custo_produto'] !=
+                                                    null
+                                                ? produto['preco_custo_produto']
+                                                    .toDouble()
+                                                : 0.0,
+                                          });
+                                          pilhaSections[index].selectedProduto =
+                                              null;
+                                        });
+                                        setState(() {
+                                          atualizarTotal();
+                                        });
+                                      }
+                                    },
+                                    isExpanded: true,
+                                  ),
+                                  const SizedBox(height: 20),
+                                  const Text(
+                                    'Produtos Selecionados:',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  ListView.builder(
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemCount: pilhaSections[index]
+                                        .produtosSelecionados
+                                        .length,
+                                    itemBuilder: (context, prodIndex) {
+                                      final produto = pilhaSections[index]
+                                          .produtosSelecionados[prodIndex];
+                                      return ListTile(
+                                        title: Text(produto['descricao']),
+                                        subtitle: Text(
+                                            'Quantidade: ${produto['quantidade']}, Preço: R\$ ${produto['preco_custo_produto']}'),
+                                        trailing: IconButton(
+                                          icon: const Icon(Icons.delete,
+                                              color: Colors.red),
+                                          onPressed: () {
+                                            setStateBuilder(() {
+                                              pilhaSections[index]
+                                                  .produtosSelecionados
+                                                  .removeAt(prodIndex);
+                                            });
+                                            setState(() {
+                                              atualizarTotal();
+                                            });
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 20),
+                          const Text(
+                            'Medidas do Cavalo:',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: CustomTextFormField(
+                                  controller:
+                                      pilhaSections[index].altura1Controller,
+                                  label: 'Altura 1',
+                                  icon: Icons.height,
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) => calcularTotais(),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: CustomTextFormField(
+                                  controller:
+                                      pilhaSections[index].altura2Controller,
+                                  label: 'Altura 2',
+                                  icon: Icons.height,
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) => calcularTotais(),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: CustomTextFormField(
+                                  controller:
+                                      pilhaSections[index].altura3Controller,
+                                  label: 'Altura 3',
+                                  icon: Icons.height,
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) => calcularTotais(),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: CustomTextFormField(
+                                  controller:
+                                      pilhaSections[index].altura4Controller,
+                                  label: 'Altura 4',
+                                  icon: Icons.height,
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) => calcularTotais(),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: CustomTextFormField(
+                                  controller:
+                                      pilhaSections[index].altura5Controller,
+                                  label: 'Altura 5',
+                                  icon: Icons.height,
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) => calcularTotais(),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: CustomTextFormField(
+                                  controller:
+                                      pilhaSections[index].altura6Controller,
+                                  label: 'Altura 6',
+                                  icon: Icons.height,
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) => calcularTotais(),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: CustomTextFormField(
+                                  controller:
+                                      pilhaSections[index].larguraController,
+                                  label: 'Largura',
+                                  icon: Icons.width_normal,
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) => calcularTotais(),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: CustomTextFormField(
+                                  controller: pilhaSections[index]
+                                      .comprimentoController,
+                                  label: 'Comprimento',
+                                  icon: Icons.straighten,
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) => calcularTotais(),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          const Text(
+                            'Medidas da Julieta:',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: CustomTextFormField(
+                                  controller: pilhaSections[index]
+                                      .alturaJulieta1Controller,
+                                  label: 'Altura 1',
+                                  icon: Icons.height,
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) => calcularTotais(),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: CustomTextFormField(
+                                  controller: pilhaSections[index]
+                                      .alturaJulieta2Controller,
+                                  label: 'Altura 2',
+                                  icon: Icons.height,
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) => calcularTotais(),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: CustomTextFormField(
+                                  controller: pilhaSections[index]
+                                      .alturaJulieta3Controller,
+                                  label: 'Altura 3',
+                                  icon: Icons.height,
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) => calcularTotais(),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: CustomTextFormField(
+                                  controller: pilhaSections[index]
+                                      .alturaJulieta4Controller,
+                                  label: 'Altura 4',
+                                  icon: Icons.height,
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) => calcularTotais(),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: CustomTextFormField(
+                                  controller: pilhaSections[index]
+                                      .alturaJulieta5Controller,
+                                  label: 'Altura 5',
+                                  icon: Icons.height,
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) => calcularTotais(),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: CustomTextFormField(
+                                  controller: pilhaSections[index]
+                                      .alturaJulieta6Controller,
+                                  label: 'Altura 6',
+                                  icon: Icons.height,
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) => calcularTotais(),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: CustomTextFormField(
+                                  controller: pilhaSections[index]
+                                      .larguraJulietaController,
+                                  label: 'Largura',
+                                  icon: Icons.width_normal,
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) => calcularTotais(),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: CustomTextFormField(
+                                  controller: pilhaSections[index]
+                                      .comprimentoJulietaController,
+                                  label: 'Comprimento',
+                                  icon: Icons.straighten,
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) => calcularTotais(),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: CustomTextFormField(
+                                  controller: pilhaSections[index]
+                                      .totalCavaloController,
+                                  label: 'Total Cavalo',
+                                  icon: Icons.attach_money,
+                                  keyboardType: TextInputType.number,
+                                  enabled: false,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: CustomTextFormField(
+                                  controller: pilhaSections[index]
+                                      .totalJulietaController,
+                                  label: 'Total Julieta',
+                                  icon: Icons.attach_money,
+                                  keyboardType: TextInputType.number,
+                                  enabled: false,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                        const Divider(),
+                      ],
+                    );
+                  }),
+                ],
               ),
               const SizedBox(height: 10),
               CustomTextFormField(
@@ -833,314 +1380,11 @@ class _CadTicketState extends State<CadTicket> {
                 maxLines: 3,
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Medidas do Cavalo:',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: CustomTextFormField(
-                      controller: altura1Controller,
-                      label: 'Altura 1',
-                      icon: Icons.height,
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) => calcularTotais(),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: CustomTextFormField(
-                      controller: altura2Controller,
-                      label: 'Altura 2',
-                      icon: Icons.height,
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) => calcularTotais(),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: CustomTextFormField(
-                      controller: altura3Controller,
-                      label: 'Altura 3',
-                      icon: Icons.height,
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) => calcularTotais(),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: CustomTextFormField(
-                      controller: altura4Controller,
-                      label: 'Altura 4',
-                      icon: Icons.height,
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) => calcularTotais(),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: CustomTextFormField(
-                      controller: altura5Controller,
-                      label: 'Altura 5',
-                      icon: Icons.height,
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) => calcularTotais(),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: CustomTextFormField(
-                      controller: altura6Controller,
-                      label: 'Altura 6',
-                      icon: Icons.height,
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) => calcularTotais(),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: CustomTextFormField(
-                      controller: larguraController,
-                      label: 'Largura',
-                      icon: Icons.width_normal,
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) => calcularTotais(),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: CustomTextFormField(
-                      controller: comprimentoController,
-                      label: 'Comprimento',
-                      icon: Icons.straighten,
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) => calcularTotais(),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: CustomTextFormField(
-                      controller: totalCavaloController,
-                      label: 'Total Cavalo',
-                      icon: Icons.attach_money,
-                      keyboardType: TextInputType.number,
-                      enabled: false,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Medidas da Julieta:',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: CustomTextFormField(
-                      controller: alturaJulieta1Controller,
-                      label: 'Altura 1',
-                      icon: Icons.height,
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) => calcularTotais(),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: CustomTextFormField(
-                      controller: alturaJulieta2Controller,
-                      label: 'Altura 2',
-                      icon: Icons.height,
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) => calcularTotais(),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: CustomTextFormField(
-                      controller: alturaJulieta3Controller,
-                      label: 'Altura 3',
-                      icon: Icons.height,
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) => calcularTotais(),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: CustomTextFormField(
-                      controller: alturaJulieta4Controller,
-                      label: 'Altura 4',
-                      icon: Icons.height,
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) => calcularTotais(),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: CustomTextFormField(
-                      controller: alturaJulieta5Controller,
-                      label: 'Altura 5',
-                      icon: Icons.height,
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) => calcularTotais(),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: CustomTextFormField(
-                      controller: alturaJulieta6Controller,
-                      label: 'Altura 6',
-                      icon: Icons.height,
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) => calcularTotais(),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: CustomTextFormField(
-                      controller: larguraJulietaController,
-                      label: 'Largura',
-                      icon: Icons.width_normal,
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) => calcularTotais(),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: CustomTextFormField(
-                      controller: comprimentoJulietaController,
-                      label: 'Comprimento',
-                      icon: Icons.straighten,
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) => calcularTotais(),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: CustomTextFormField(
-                      controller: totalJulietaController,
-                      label: 'Total Julieta',
-                      icon: Icons.attach_money,
-                      keyboardType: TextInputType.number,
-                      enabled: false,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () => _openModal(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF043259),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  'Selecionar Produtos',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Produtos Selecionados:',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: produtosSelecionados.length,
-                itemBuilder: (context, index) {
-                  final produto = produtosSelecionados[index];
-                  return ListTile(
-                    title: Text(produto['descricao']),
-                    subtitle: Text(
-                        'Quantidade: ${produto['quantidade']}, Preço: R\$ ${produto['preco_custo_produto']}'),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: const Text('Confirmação'),
-                              content:
-                                  const Text('Deseja remover este produto?'),
-                              actions: <Widget>[
-                                TextButton(
-                                  child: const Text('Cancelar'),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                                TextButton(
-                                  child: const Text('Remover'),
-                                  onPressed: () {
-                                    setState(() {
-                                      produtosSelecionados.removeAt(index);
-                                      atualizarTotal(); // Atualizar total após remover
-                                    });
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
               CustomTextFormField(
                 controller: totalController,
                 label: 'Total',
                 icon: Icons.attach_money,
-                enabled: false,
+                enabled: true,
               ),
               ElevatedButton(
                 onPressed: () async {
@@ -1245,16 +1489,19 @@ class CustomTypeAheadField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TypeAheadField<Map<String, dynamic>>(
-      textFieldConfiguration: TextFieldConfiguration(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-          prefixIcon: Icon(icon),
-        ),
-      ),
+      builder: (context, controller, focusNode) {
+        return TextField(
+          controller: controller,
+          focusNode: focusNode,
+          decoration: InputDecoration(
+            labelText: label,
+            border: const OutlineInputBorder(),
+            prefixIcon: Icon(icon),
+          ),
+        );
+      },
       suggestionsCallback: suggestionsCallback,
-      onSuggestionSelected: onSuggestionSelected,
+      onSelected: onSuggestionSelected,
       itemBuilder: itemBuilder,
     );
   }
